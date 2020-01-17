@@ -207,7 +207,6 @@ var initDBEnemies = function (w) { return w.db
     : error("window.db wasn't initd"); };
 var initCurrentEnemy = function (w) { return w.enemy = DEFAULT_CURRENT_ENEMY; };
 var initLanguage = function (w) { return w.lang = DEFAULT_LANG; };
-// const initHelper: Initializer = w => w.helper = w.helper || {};
 // Specific initilizatiors
 function initHelper(w, e, l) {
     w.helper = {
@@ -351,18 +350,3 @@ var enemyManager = new EnemyManager(extendedWindow, ENEMIES);
 var localizationManager = new LocalizationManager(extendedWindow);
 initHelper(window, enemyManager, localizationManager);
 initAliases(window, enemyManager, localizationManager);
-//////////////////////// LEGACY ////////////////////////
-// window.helper = {
-// 	prepareEnemy: prepareEnemyWithOptionalFunc,
-// 	randomEnemy,
-// 	randomEnemyID,
-// 	randomEnemyForestID,
-// 	toggleLanguage,
-// 	chooseLanguage,
-// 	localizedText,
-// 	localizedTextParsed,
-// }
-// window.s = window.story.state
-// window.h = window.helper
-// window.l = window.lang
-// window.t = window.h.localizedTextParsed

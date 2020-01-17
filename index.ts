@@ -74,7 +74,7 @@ interface State {
   bandit_1_killed?: boolean;
   bandit_2_killed?: boolean;
   antony_angry?: boolean;
-  antony_killed: boolean;
+  antony_killed?: boolean;
 }
 
 interface Database {
