@@ -81,11 +81,6 @@ interface Database {
   enemies: Enemy[];
 }
 
-interface LocalizedObject {
-  ru: string;
-  en: string;
-}
-
 interface Enemy {
   id: EnemyId;
   name: LocalizedObject;
@@ -94,6 +89,17 @@ interface Enemy {
   evadePassage: string;
   victoryPassage: string;
   victoryCallback: (s: State) => void;
+}
+
+type Initializer = (w: WindowExtended) => void;
+
+interface LocalizedObject {
+  ru: string;
+  en: string;
+}
+
+type LocalizedStringsObject = {
+  [k in LocalizationStringIds]: string;
 }
 
 type Language = "en" | "ru"
@@ -105,25 +111,14 @@ interface LangObject {
 
 type LangLines = { [k in Language]: LocalizedStringsObject }
 
-interface Helper {
-}
-
-type Initializer = (w: WindowExtended) => void;
-
-type LocalizedStringsObject = {
-  [k in LocalizationStringIds]: string;
-}
-
-interface LocalizationManagerConstructor {
-  new (l: LangObject): LocalizationManagerInterface;
-}
-
 interface LocalizationManagerInterface {
   getLocalizedText: (id: LocalizationStringIds) => string;
   getLocalizedTextParsed: (id: LocalizationStringIds, values?: Object ) => string;
   toggleLanguage: () => void;
   chooseLanguage: (value: Language) => void;
 }
+
+interface Helper {}
 
 type Alias = any;
 
