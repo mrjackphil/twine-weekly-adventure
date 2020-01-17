@@ -11,6 +11,14 @@ type EnemyId = "rogue_1"
 
 // #region LOCALIZATION_STRING_IDS
 type LocalizationStringIds = "start_01"
+  | "accept"
+  | "deny"
+  | "antony_task_accepted"
+  | "antony_task_description"
+  | "antony_task_waits"
+  | "antony_task_complete"
+  | "antony_task_talk"
+  | "antony_choice_waiting"
   | "crossroad"
   | "crossroad_description"
   | "to_city"
@@ -63,11 +71,30 @@ type LocalizationStringIds = "start_01"
   | "return"
   | "death_message"
   | "restart"
+  | "game_complete"
 // #endregion
 
 interface Config {
   deadMessage?: string;
   deathPassage?: string;
+}
+
+interface Story {
+  state: Partial<State>;
+  character: Character;
+}
+
+interface Character {
+  inventory: Inventory;
+  attack: number;
+  health: number;
+  maxHealth: number;
+}
+
+interface Inventory {
+  addItem: (s: string) => void;
+  removeItem: (s: string) => void;
+  hasItem: (s: string) => boolean;
 }
 
 interface State {
@@ -88,7 +115,7 @@ interface Enemy {
   attack: number;
   evadePassage: string;
   victoryPassage: string;
-  victoryCallback: (s: State) => void;
+  victoryCallback: (s: WindowExtended) => void;
 }
 
 type Initializer = (w: WindowExtended) => void;
@@ -125,9 +152,8 @@ type Alias = any;
 interface WindowExtended extends Window {
   config?: Config;
   db?: Database;
-  story?: {
-    state?: Partial<State>;
-  },
+  story?: Partial<Story>;
+  character?: Character;
   enemy?: Partial<Enemy>;
   lang?: LangObject;
   helper?: Helper;
@@ -153,7 +179,7 @@ const ENEMIES: Enemy[] = [
 		attack: 1,
 		evadePassage: "Логово разбойников",
 		victoryPassage: "Атаковать второго охранника",
-		victoryCallback: (state) => state.bandit_1_killed = true,
+		victoryCallback: (w) => w.s.bandit_1_killed = true,
 	},
 	{
 		id: "rogue_2",
@@ -162,7 +188,13 @@ const ENEMIES: Enemy[] = [
 		attack: 2,
 		evadePassage: "Логово разбойников",
 		victoryPassage: "Диалог с Энтони",
-		victoryCallback: (state) => state.bandit_2_killed = true,
+		victoryCallback: (w) => {
+      w.s.bandit_2_killed = true
+      if (w.character) {
+        w.character.inventory.addItem("sword");
+        w.character.attack = 10;
+      }
+    }
 	},
 	{
 		id: "rogue_antony",
@@ -170,8 +202,18 @@ const ENEMIES: Enemy[] = [
 		hp: 20,
 		attack: 5,
 		evadePassage: "Логово разбойников",
-		victoryPassage: "Диалог с Энтони",
-		victoryCallback: (state) => state.antony_killed = true,
+		victoryPassage: "Развилка",
+		victoryCallback: (w) => {
+      w.s.antony_killed = true;
+      if (w.character) {
+        w.character.inventory.addItem("fire-sword");
+        w.character.inventory.addItem("holy-shield");
+        w.character.inventory.removeItem("sword");
+        w.character.attack = 100;
+        w.character.maxHealth = 100;
+        w.character.health = 100;
+      }
+    }
 	},
 	{
 		id: "final_dragon",
@@ -274,8 +316,17 @@ const LOCALIZED_STRINGS: LangLines = {
 		leave_message: "Вы успешно возвращаетесь назад.",
 		return: "Вернуться",
 		death_message: "Герой не смог выстоять. Но у него всё ещё есть возможность победить.",
-		restart: "Начать заново",
-	},
+    restart: "Начать заново",
+    antony_task_description: `"В городе есть кузнец. Он задолжал мне немного денег. Каких-то 2000 золотых. Если ты вежливо попросишь их у него, то половина денег твоя. Что скажешь?" \n\n Энтони ожидает вашего ответа.`,
+    accept: "Согласиться",
+    deny: "Отказаться",
+    antony_task_accepted: `"Я знал, что мы подружимся. Иди и сделай дело. Я буду ждать тебя здесь." \n\n Энтони широко улыбается.`,
+    antony_task_complete: `"Отлично. Неужели ты и вправду думал, что поделюсь с тобой деньгами? Вали отсюда и не приходи сюда больше." \n\n Энтони поворачивается, давая понять, что разговор закончен.`,
+    antony_task_waits: `"Я жду." \n\n Энтони недовольно хмурится.`,
+    antony_task_talk: "Говорить с Энтони",
+    antony_choice_waiting: "стоит Энтони.",
+    game_complete: "Поздравляю. Вы победили дракона. Получили много денег и славы.",
+ 	},
 	en: {
 		start_01: "Hero stand near the crossroad. His name is <input maxlength=\"7\" oninput=\"character.name = this.value\">. His goal is to kill the dragon. But first he must get stronger.",
 		crossroad: "Crossroad",
@@ -329,7 +380,16 @@ const LOCALIZED_STRINGS: LangLines = {
 		leave_message: "You succesfully leaving.",
 		return: "Return",
 		death_message: "You didn't make it. But you still can make it.",
-		restart: "Start again",
+    restart: "Start again",
+    antony_task_description: `"There is a blacksmithe in the city. He didn't pay last month. Go there and take 2000 golds from him. You can take a half of it. What do you think?" \n\n Antony waits for your decision.`,
+    accept: "Accept",
+    deny: "Deny",
+    antony_task_accepted: `"I knew we will be a good friends. Go and do what must be done. I'll wait you here." \n\n Antony smiling.`,
+    antony_task_complete: `"Good. Are you really thought what I will give you money? Get out of here." \n\n Antony turn around. He doesn't want to speak with you.`,
+    antony_task_waits: `"Don't keep me waiting." \n\n Antony staring at you. He doesn't want to wait.`,
+    antony_task_talk: "Talk with Antony",
+    antony_choice_waiting: "Antony waits.",
+    game_complete: "Congratulations. You defeate the dragon. You received a lot of money and fame.",
 	}
 }
 
